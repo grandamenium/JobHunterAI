@@ -1,0 +1,104 @@
+Prompt for Replit:
+
+Task:
+Let's create a Minimum Viable Product (MVP) for the job search feature. Instead of scraping real job listings, we will:
+
+Generate 10 diverse example jobs and store them in a local database as objects.
+Modify the job search function to query this local database for jobs that match the user's search keywords.
+Return relevant job listings based on keyword matching.
+Implementation Steps:
+Define a Job Model in the database (SQLite for simplicity).
+Prepopulate the database with 10 different job listings.
+Modify the job search to filter jobs by keyword in the title or description.
+Return matching job listings when a user searches.
+Code to Implement:
+1. Define the Job Model & Database Setup
+python
+Copy
+Edit
+from flask import Flask, request, jsonify
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///jobs.db'  # Using SQLite for MVP
+db = SQLAlchemy(app)
+
+class Job(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    company = db.Column(db.String(100), nullable=False)
+    location = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+
+# Create the database
+with app.app_context():
+    db.create_all()
+2. Populate the Database with 10 Sample Jobs
+python
+Copy
+Edit
+def seed_database():
+    example_jobs = [
+        Job(title="Neuroscience Researcher", company="Yale Medical School", location="New Haven, CT", description="Conduct brain imaging studies on cognitive function."),
+        Job(title="AI Engineer", company="Google", location="New York, NY", description="Develop machine learning models for natural language processing."),
+        Job(title="Data Scientist", company="Meta", location="San Francisco, CA", description="Analyze social media trends using big data."),
+        Job(title="Clinical Trial Coordinator", company="Pfizer", location="Boston, MA", description="Manage neuroscience-related clinical trials."),
+        Job(title="Software Engineer", company="Microsoft", location="Seattle, WA", description="Develop backend services for cloud applications."),
+        Job(title="Biomedical Engineer", company="Johnson & Johnson", location="Los Angeles, CA", description="Design medical devices for neurological disorders."),
+        Job(title="Lab Technician", company="Harvard Medical School", location="Boston, MA", description="Perform lab tests and assist with neuroscience experiments."),
+        Job(title="Psychology Professor", company="Stanford University", location="Stanford, CA", description="Teach cognitive neuroscience courses."),
+        Job(title="Healthcare Consultant", company="McKinsey & Co.", location="Chicago, IL", description="Advise hospitals on implementing AI-based healthcare solutions."),
+        Job(title="UX Researcher", company="Apple", location="Cupertino, CA", description="Study user interactions to improve accessibility for people with neurological conditions."),
+    ]
+
+    db.session.bulk_save_objects(example_jobs)
+    db.session.commit()
+
+# Run this once to populate the database
+with app.app_context():
+    seed_database()
+3. Implement Search Functionality
+python
+Copy
+Edit
+@app.route('/search_jobs', methods=['GET'])
+def search_jobs():
+    keyword = request.args.get('keyword', '').lower()
+    location = request.args.get('location', '').lower()
+
+    # Query the database for matching jobs
+    matching_jobs = Job.query.filter(
+        (Job.title.ilike(f"%{keyword}%")) | 
+        (Job.description.ilike(f"%{keyword}%")),
+        Job.location.ilike(f"%{location}%")
+    ).all()
+
+    # Convert job results to JSON format
+    job_results = [{
+        "title": job.title,
+        "company": job.company,
+        "location": job.location,
+        "description": job.description
+    } for job in matching_jobs]
+
+    return jsonify(job_results)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+Expected Behavior
+✅ Stores 10 example job listings in a local SQLite database.
+✅ Searches jobs by keyword in the title and description.
+✅ Filters results by user-input location.
+✅ Returns JSON response of matching jobs.
+
+Next Steps
+Once this works, we can later replace the dummy database with real job scraping or an external API integration for real-time job listings.
+
+Let me know if you'd like any modifications! 🚀
+
+
+
+
+
+
+

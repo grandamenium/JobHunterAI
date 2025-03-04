@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Your Resume</h5>
+                <form id="resume-form" method="POST" enctype="multipart/form-data">
+                    {% if current_user.resume_filename %}
+                    <div class="alert alert-info">
+                        <p>Current Resume: {{ current_user.resume_filename }}</p>
+                        <a href="{{ url_for('download_resume') }}" class="btn btn-sm btn-secondary">Download Current Resume</a>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label for="resume-file" class="form-label">Upload Resume (PDF or DOCX)</label>
+                        <input type="file" class="form-control" id="resume-file" name="resume-file" accept=".pdf,.docx" required>
+                        <div class="form-text">Maximum file size: 5MB</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload Resume</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Resume Tips</h5>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-check-circle"></i> Use clear, professional formatting</li>
+                    <li><i class="bi bi-check-circle"></i> Include relevant experience</li>
+                    <li><i class="bi bi-check-circle"></i> Highlight key achievements</li>
+                    <li><i class="bi bi-check-circle"></i> Check for typos</li>
+                </ul>
+            </div>
+        </div>
+
+        {% if current_user.resume_filename %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">AI Optimization</h5>
+                <p class="card-text">Ready to optimize your resume for specific jobs!</p>
+                <a href="{{ url_for('jobs') }}" class="btn btn-primary">Search Jobs</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+/* Custom styles that complement Bootstrap dark theme */
+
+/* Body styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Main content area */
+main.container {
+    flex: 1;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* Card customization */
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15);
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    color: var(--bs-primary);
+    margin-bottom: 1.25rem;
+}
+
+/* Job listings */
+#job-listings .card {
+    transition: transform 0.2s ease;
+}
+
+#job-listings .card:hover {
+    transform: translateY(-2px);
+}
+
+/* Status badges */
+.badge {
+    padding: 0.5em 0.75em;
+}
+
+/* Form elements */
+.form-control, .form-select {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+}
+
+/* Custom button styles */
+.btn-primary {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+}
+
+/* Modal customization */
+.modal-content {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+}
+
+/* Resume optimization preview */
+#optimized-resume {
+    font-family: monospace;
+    white-space: pre-wrap;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Application tracker table */
+.table {
+    margin-bottom: 0;
+}
+
+.table th {
+    border-top: none;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+/* Footer customization */
+.footer {
+    margin-top: auto;
+    padding: 1.5rem 0;
+    background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Alert customization */
+.alert {
+    margin-bottom: 1.5rem;
+    border: none;
+}
+
+/* Icons */
+.bi {
+    margin-right: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        margin: 0 -1rem;
+    }
+}
+
+/* Loading spinner */
+.spinner-border {
+    margin: 2rem auto;
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Status colors */
+.bg-applied { background-color: var(--bs-primary) !important; }
+.bg-interviewing { background-color: var(--bs-info) !important; }
+.bg-offered { background-color: var(--bs-success) !important; }
+.bg-rejected { background-color: var(--bs-danger) !important; }

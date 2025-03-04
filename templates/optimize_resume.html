@@ -1,0 +1,120 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Optimize Resume for {{ job.title }}</h5>
+                    <div class="mb-3">
+                        <p><strong>Company:</strong> {{ job.company }}</p>
+                        <p><strong>Location:</strong> {{ job.location }}</p>
+                        <p><strong>Description:</strong> {{ job.description }}</p>
+                    </div>
+                    <button id="optimize-button" class="btn btn-primary">
+                        <i class="bi bi-magic"></i> Optimize Resume for This Position
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="optimization-result" class="row" style="display: none;">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Optimized Resume</h5>
+                    <div class="mb-3">
+                        <h6>Changes Made:</h6>
+                        <ul id="changes-list" class="list-group mb-3">
+                        </ul>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success" id="download-resume">
+                                <i class="bi bi-download"></i> Download Optimized Resume
+                            </button>
+                            <button class="btn btn-primary" id="apply-changes">
+                                <i class="bi bi-check-circle"></i> Apply Changes
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <h6>Preview:</h6>
+                        <div id="resume-preview" class="border p-3 bg-light">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('optimize-button').addEventListener('click', async function() {
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Optimizing...';
+
+    try {
+        const response = await fetch('/optimize-resume/{{ job.id }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Show optimization result
+            document.getElementById('optimization-result').style.display = 'block';
+
+            // Display changes
+            const changesList = document.getElementById('changes-list');
+            changesList.innerHTML = result.changes.map(change => 
+                `<li class="list-group-item">${change}</li>`
+            ).join('');
+
+            // Show preview
+            document.getElementById('resume-preview').textContent = result.optimized_resume;
+
+            // Setup download handler
+            document.getElementById('download-resume').onclick = function() {
+                const blob = new Blob([result.optimized_resume], { type: 'text/plain' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'optimized_resume.txt';
+                a.click();
+                window.URL.revokeObjectURL(url);
+            };
+
+            // Setup apply changes handler
+            document.getElementById('apply-changes').onclick = async function() {
+                const applyResponse = await fetch('/apply-optimization', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        optimized_resume: result.optimized_resume
+                    })
+                });
+
+                const applyResult = await applyResponse.json();
+                if (applyResult.success) {
+                    window.location.href = '/resume';
+                }
+            };
+        } else {
+            alert('Error optimizing resume: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while optimizing the resume');
+    } finally {
+        this.disabled = false;
+        this.innerHTML = '<i class="bi bi-magic"></i> Optimize Resume for This Position';
+    }
+});
+</script>
+{% endblock %}
