@@ -3,25 +3,53 @@ document.addEventListener('DOMContentLoaded', function() {
     // Job Search Form
     const jobSearchForm = document.getElementById('job-search-form');
     if (jobSearchForm) {
+        // Add event listeners for real-time search
+        const keywordsInput = document.getElementById('keywords');
+        const locationInput = document.getElementById('location');
+        const jobTypeSelect = document.getElementById('job-type');
+        let searchTimeout;
+        
+        // Function to handle real-time search
+        function performRealTimeSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const searchParams = {
+                    keywords: keywordsInput.value,
+                    location: locationInput.value,
+                    'job-type': jobTypeSelect.value
+                };
+                
+                // Only search if at least one field has content
+                if (searchParams.keywords || searchParams.location) {
+                    // Show loading state
+                    document.getElementById('job-listings').innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
+                    
+                    // Perform the search
+                    window.location.href = '/jobs?' + new URLSearchParams(searchParams);
+                }
+            }, 600); // Delay for typing
+        }
+        
+        // Setup real-time search on input
+        keywordsInput.addEventListener('input', performRealTimeSearch);
+        locationInput.addEventListener('input', performRealTimeSearch);
+        jobTypeSelect.addEventListener('change', performRealTimeSearch);
+        
+        // Still handle the form submission directly
         jobSearchForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(this);
             const searchParams = {
                 keywords: formData.get('keywords'),
                 location: formData.get('location'),
-                jobType: formData.get('job-type')
+                'job-type': formData.get('job-type')
             };
 
             // Show loading state
             document.getElementById('job-listings').innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
 
-            // Refresh job listings
-            fetch('/search-jobs?' + new URLSearchParams(searchParams))
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('job-listings').innerHTML = html;
-                    initializeJobButtons(); // Initialize buttons after content update
-                });
+            // Perform the search by redirecting to the URL with search parameters
+            window.location.href = '/jobs?' + new URLSearchParams(searchParams);
         });
     }
 

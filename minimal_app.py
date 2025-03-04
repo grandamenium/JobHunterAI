@@ -6,6 +6,7 @@ import webbrowser
 import threading
 import time
 import logging
+import os
 from datetime import datetime
 from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_login import LoginManager, UserMixin, login_user, logout_user, current_user, login_required
@@ -313,7 +314,8 @@ def applications():
 def open_browser():
     """Open browser automatically after a short delay"""
     time.sleep(1.5)
-    url = "http://localhost:9090"
+    port = int(os.environ.get('FLASK_RUN_PORT', 9090))
+    url = f"http://localhost:{port}"
     webbrowser.open(url)
     print(f"Opening browser at {url}")
 
@@ -332,5 +334,7 @@ if __name__ == '__main__':
     print("Starting minimal JobHunterAI application...")
     print("Test user created: email=test@example.com, password=password")
     
-    # Run the Flask app on a different port
-    app.run(host='127.0.0.1', port=9090, debug=True)
+    # Get port from environment variable or use default
+    port = int(os.environ.get('FLASK_RUN_PORT', 9090))
+    print(f"Starting server on port {port}")
+    app.run(host='127.0.0.1', port=port, debug=True)

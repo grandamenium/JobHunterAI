@@ -7,6 +7,7 @@ import threading
 import time
 import logging
 import os
+import random
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -147,7 +148,10 @@ class JobScraperAgent:
             
             # Make request with appropriate headers
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Referer': 'https://www.usajobs.gov/'
             }
             
             response = requests.get(search_url, headers=headers)
@@ -163,24 +167,59 @@ class JobScraperAgent:
             # Find job listings
             job_listings = []
             
-            # USAJobs uses a specific structure for job listings
-            # Each job is in a div with class 'usajobs-search-result--core'
-            job_divs = soup.select('.usajobs-search-result--core')
+            # USAJobs may have updated their class names, try different selectors
+            # Each job is in a div with either class 'usajobs-search-result--core' or similar
+            job_divs = soup.select('.usajobs-search-result--core, .usajobs-search-result, article.usajobs-search-result')
+            
+            # If we didn't find any jobs with the selectors, try looking for article tags
+            if not job_divs:
+                job_divs = soup.select('article')
             
             for job_div in job_divs:
                 try:
-                    # Extract job details
-                    title_elem = job_div.select_one('.usajobs-search-result__title a')
-                    company_elem = job_div.select_one('.usajobs-search-result__department')
-                    location_elem = job_div.select_one('.usajobs-search-result__location')
+                    # Extract job details - try multiple selectors to handle different HTML structures
+                    # Title selectors
+                    title_elem = (
+                        job_div.select_one('.usajobs-search-result__title a') or
+                        job_div.select_one('h3.usajobs-search-result__title a') or
+                        job_div.select_one('h3 a') or
+                        job_div.select_one('a[data-test="job-title"]') or
+                        job_div.select_one('a.usa-link')
+                    )
+                    
+                    # Company selectors
+                    company_elem = (
+                        job_div.select_one('.usajobs-search-result__department') or
+                        job_div.select_one('.agency') or
+                        job_div.select_one('.department') or
+                        job_div.select_one('[data-test="agency-name"]') or
+                        job_div.select_one('div.usajobs-search-result__header span')
+                    )
+                    
+                    # Location selectors
+                    location_elem = (
+                        job_div.select_one('.usajobs-search-result__location') or
+                        job_div.select_one('.location') or
+                        job_div.select_one('[data-test="location"]') or
+                        job_div.select_one('div[itemprop="jobLocation"]')
+                    )
                     
                     # Skip if essential elements are missing
-                    if not title_elem or not company_elem:
+                    if not title_elem:
+                        self.logger.warning(f"Skipping job: unable to find title element")
                         continue
                         
                     # Get job title and URL
                     title = title_elem.text.strip()
-                    job_url = "https://www.usajobs.gov" + title_elem['href'] if title_elem.has_attr('href') else ""
+                    # Handle different URL formats
+                    if title_elem.has_attr('href'):
+                        href = title_elem['href']
+                        if href.startswith('http'):
+                            job_url = href
+                        else:
+                            job_url = "https://www.usajobs.gov" + href
+                    else:
+                        job_url = "https://www.usajobs.gov/Search/Results"
                     
                     # Get company/agency
                     company = company_elem.text.strip() if company_elem else "Unknown Agency"
@@ -188,9 +227,25 @@ class JobScraperAgent:
                     # Get location
                     location = location_elem.text.strip() if location_elem else "Various Locations"
                     
-                    # Try to get description snippet
-                    description_elem = job_div.select_one('.usajobs-search-result__body')
+                    # Try to get description snippet with multiple selectors
+                    description_elem = (
+                        job_div.select_one('.usajobs-search-result__body') or
+                        job_div.select_one('.summary') or
+                        job_div.select_one('[data-test="job-description"]') or
+                        job_div.select_one('div[itemprop="description"]') or
+                        job_div.select_one('p.usa-prose')
+                    )
                     description = description_elem.text.strip() if description_elem else "No description available."
+                    
+                    # Extract salary information if available - try multiple selectors
+                    salary_elem = (
+                        job_div.select_one('.usajobs-search-result__salary') or
+                        job_div.select_one('.salary') or
+                        job_div.select_one('[data-test="salary"]') or
+                        job_div.select_one('div[itemprop="baseSalary"]') or
+                        job_div.select_one('div.salary')
+                    )
+                    salary = salary_elem.text.strip() if salary_elem else "Salary not specified"
                     
                     # Create job dictionary
                     job = {
@@ -198,6 +253,7 @@ class JobScraperAgent:
                         'company': company,
                         'location': location,
                         'description': description,
+                        'salary': salary,
                         'url': job_url,
                         'source': 'USAJobs.gov',
                         'date_posted': datetime.utcnow()
@@ -225,7 +281,7 @@ job_scraper = JobScraperAgent()
 
 # Define Job class 
 class Job:
-    def __init__(self, id, title, company, location, description, url="", source="Sample", date_posted=None):
+    def __init__(self, id, title, company, location, description, url="", source="Sample", date_posted=None, salary="Salary not specified"):
         self.id = id
         self.title = title
         self.company = company
@@ -234,6 +290,7 @@ class Job:
         self.url = url
         self.source = source
         self.date_posted = date_posted or datetime.utcnow()
+        self.salary = salary
 
 # Store scraped jobs
 scraped_jobs = []
@@ -242,11 +299,11 @@ next_job_id = 4  # Start after the sample jobs
 # Sample job listings
 jobs_list = [
     Job(1, "Software Engineer", "Google", "Mountain View, CA", "Build amazing software.", 
-        url="https://careers.google.com/sample/1", source="Sample Data"),
+        url="https://careers.google.com/sample/1", source="Sample Data", salary="$120,000 - $180,000 per year"),
     Job(2, "Data Scientist", "Microsoft", "Redmond, WA", "Work with big data.",
-        url="https://careers.microsoft.com/sample/2", source="Sample Data"),
+        url="https://careers.microsoft.com/sample/2", source="Sample Data", salary="$130,000 - $190,000 per year"),
     Job(3, "Frontend Developer", "Meta", "Menlo Park, CA", "Create user interfaces.",
-        url="https://careers.meta.com/sample/3", source="Sample Data")
+        url="https://careers.meta.com/sample/3", source="Sample Data", salary="$110,000 - $170,000 per year")
 ]
 
 # User loader function
@@ -325,51 +382,182 @@ def jobs():
     location = request.args.get('location', '')
     job_type = request.args.get('job-type', 'full-time')
     
-    # If search parameters exist, perform a search
-    if keywords or location:
-        try:
-            # Log the search
+    try:
+        # Clear previous scraped jobs
+        global scraped_jobs, next_job_id
+        scraped_jobs = []
+        
+        # If no search parameters, use default searches that should return results
+        if not keywords and not location:
+            # Use a list of guaranteed popular jobs that exist on USAJobs frequently
+            default_searches = [
+                {"keywords": "analyst", "location": ""},             # Very common job title
+                {"keywords": "assistant", "location": ""},           # Very common job title
+                {"keywords": "specialist", "location": ""},          # Very common job title
+                {"keywords": "technician", "location": ""},          # Common technical job
+                {"keywords": "administrator", "location": ""},       # Common admin job
+                {"keywords": "clerk", "location": ""},               # Very common entry-level
+                {"keywords": "coordinator", "location": ""},         # Common job title
+                {"keywords": "program", "location": ""},             # Matches program manager/analyst
+                {"keywords": "IT ", "location": ""},                 # IT positions (note space to avoid matching "position")
+                {"keywords": "nursing", "location": ""},             # Healthcare positions
+                {"keywords": "security", "location": ""}             # Security positions
+            ]
+            
+            # Also try some location-specific searches if keyword searches fail
+            location_searches = [
+                {"keywords": "", "location": "Washington DC"},      # DC has many federal jobs
+                {"keywords": "", "location": "Arlington VA"},       # VA has many federal jobs
+                {"keywords": "", "location": "Remote"}              # Remote jobs
+            ]
+            
+            # First try keyword-based searches
+            usajobs_results = []
+            for search in default_searches:
+                # Try each default search until we get some results
+                logger.info(f"Trying default search - Keywords: {search['keywords']}, Location: {search['location']}")
+                results = job_scraper.scrape_usajobs(search['keywords'], search['location'], job_type)
+                if results and len(results) > 0:
+                    logger.info(f"Found {len(results)} jobs with default search")
+                    usajobs_results = results
+                    break
+                # Small delay to avoid rate limiting
+                time.sleep(0.5)
+            
+            # If all keyword searches failed, try location-based searches
+            if not usajobs_results:
+                logger.info("Keyword searches failed, trying location-based searches")
+                for search in location_searches:
+                    logger.info(f"Trying location search - Location: {search['location']}")
+                    results = job_scraper.scrape_usajobs(search['keywords'], search['location'], job_type)
+                    if results and len(results) > 0:
+                        logger.info(f"Found {len(results)} jobs with location search")
+                        usajobs_results = results
+                        break
+                    # Small delay to avoid rate limiting
+                    time.sleep(0.5)
+            
+            # If all searches failed, try one final broad search
+            if not usajobs_results:
+                logger.info("Trying generic searches")
+                # Try a few very basic terms that should always return results
+                for term in ["job", "position", "vacancy", "career", "work"]:
+                    results = job_scraper.scrape_usajobs(term, "", job_type)
+                    if results and len(results) > 0:
+                        logger.info(f"Found {len(results)} jobs with generic '{term}' search")
+                        usajobs_results = results
+                        break
+                    # Small delay to avoid rate limiting
+                    time.sleep(0.5)
+                    
+                # If absolutely everything failed, fall back to sample data
+                if not usajobs_results:
+                    logger.info("All searches failed, using sample data")
+                    usajobs_results = job_scraper.get_sample_jobs()
+        else:
+            # User provided search parameters
             logger.info(f"Searching jobs - Keywords: {keywords}, Location: {location}, Type: {job_type}")
-            
-            # Clear previous scraped jobs
-            global scraped_jobs, next_job_id
-            scraped_jobs = []
-            
-            # Search for jobs on USAJobs
             usajobs_results = job_scraper.scrape_usajobs(keywords, location, job_type)
             
-            # Convert the dictionary results to Job objects
-            for job_dict in usajobs_results:
-                job = Job(
-                    id=next_job_id,
-                    title=job_dict['title'],
-                    company=job_dict['company'],
-                    location=job_dict['location'],
-                    description=job_dict['description'],
-                    url=job_dict['url'],
-                    source=job_dict['source'],
-                    date_posted=job_dict['date_posted']
-                )
-                scraped_jobs.append(job)
-                next_job_id += 1
+            # If no USAJobs results, try multiple alternative approaches
+            if not usajobs_results:
+                logger.info("No USAJobs results, trying alternative searches")
                 
-            # Use scraped jobs for display
-            all_jobs = scraped_jobs
-            
-            # If no jobs were found, show a message
-            if not all_jobs:
-                flash("No jobs found matching your criteria. Try broadening your search.", "info")
-                return render_template('jobs.html', jobs=jobs_list, searched=True)
+                # 1. Try without location constraint if one was provided
+                if location:
+                    logger.info(f"Trying search without location - Keywords: {keywords}")
+                    usajobs_results = job_scraper.scrape_usajobs(keywords, "", job_type)
                 
-            return render_template('jobs.html', jobs=all_jobs, searched=True)
+                # 2. Try with broader keyword if specific keywords were provided
+                if not usajobs_results and keywords and len(keywords) > 3:
+                    # Get the first word of the keywords as a more general search
+                    broader_term = keywords.split()[0]
+                    if broader_term != keywords:
+                        logger.info(f"Trying broader search term: {broader_term}")
+                        usajobs_results = job_scraper.scrape_usajobs(broader_term, "", job_type)
+                
+                # 3. Try with similar/related keywords
+                if not usajobs_results and keywords:
+                    # Map of related job titles to try
+                    related_terms = {
+                        "engineer": ["engineering", "developer", "technical"],
+                        "developer": ["engineer", "programmer", "software"],
+                        "manager": ["director", "supervisor", "lead"],
+                        "analyst": ["specialist", "consultant", "researcher"],
+                        "assistant": ["aide", "support", "coordinator"],
+                        "administrator": ["manager", "specialist", "coordinator"]
+                    }
+                    
+                    # Check if any word in the keywords matches our related terms
+                    for word in keywords.lower().split():
+                        if word in related_terms:
+                            for related in related_terms[word]:
+                                logger.info(f"Trying related search term: {related}")
+                                related_results = job_scraper.scrape_usajobs(related, "", job_type)
+                                if related_results:
+                                    usajobs_results = related_results
+                                    break
+                            if usajobs_results:
+                                break
+                
+                # 4. If still no results, fall back to sample data with filtering
+                if not usajobs_results:
+                    logger.info("All alternative searches failed, falling back to sample data")
+                    sample_data = job_scraper.get_sample_jobs()
+                    
+                    # For sample data, apply fuzzy matching to keywords
+                    for job_dict in sample_data:
+                        # More flexible keyword matching
+                        keyword_match = True  # Default true if no keywords provided
+                        if keywords:
+                            # Break keywords into parts and check if ANY part matches
+                            keyword_parts = keywords.lower().split()
+                            keyword_match = any(
+                                part in job_dict['title'].lower() or
+                                part in job_dict['description'].lower() or
+                                part in job_dict['company'].lower()
+                                for part in keyword_parts
+                            )
+                        
+                        # Location matching (unchanged)
+                        location_match = not location or (
+                            location.lower() in job_dict['location'].lower() or
+                            location.lower() in job_dict['company'].lower()
+                        )
+                        
+                        if keyword_match and location_match:
+                            usajobs_results.append(job_dict)
+        
+        # Convert the dictionary results to Job objects
+        for job_dict in usajobs_results:
+            job = Job(
+                id=next_job_id,
+                title=job_dict['title'],
+                company=job_dict['company'],
+                location=job_dict['location'],
+                description=job_dict['description'],
+                url=job_dict['url'],
+                source=job_dict['source'],
+                date_posted=job_dict['date_posted'],
+                salary=job_dict.get('salary', 'Salary not specified')
+            )
+            scraped_jobs.append(job)
+            next_job_id += 1
             
-        except Exception as e:
-            logger.error(f"Error searching for jobs: {str(e)}")
-            flash("An error occurred while searching for jobs. Please try again.", "danger")
-            return render_template('jobs.html', jobs=jobs_list)
-    
-    # If no search parameters, show sample jobs
-    return render_template('jobs.html', jobs=jobs_list)
+        # Use scraped jobs for display
+        all_jobs = scraped_jobs
+        
+        # If no jobs were found, show a message
+        if not all_jobs:
+            flash("No jobs found matching your criteria. Try broadening your search.", "info")
+            return render_template('jobs.html', jobs=jobs_list, searched=True)
+            
+        return render_template('jobs.html', jobs=all_jobs, searched=True)
+        
+    except Exception as e:
+        logger.error(f"Error searching for jobs: {str(e)}")
+        flash("An error occurred while searching for jobs. Please try again.", "danger")
+        return render_template('jobs.html', jobs=jobs_list)
 
 @app.route('/api/search-jobs', methods=['POST'])
 @login_required
@@ -493,7 +681,7 @@ def applications():
 def open_browser():
     """Open browser automatically after a short delay"""
     time.sleep(1.5)
-    port = 9091  # Make sure this matches the port used for app.run
+    port = int(os.environ.get('FLASK_RUN_PORT', 9091))  # Get port from environment or default
     url = f"http://localhost:{port}"
     webbrowser.open(url)
     logger.info(f"Opening browser at {url}")
@@ -513,6 +701,7 @@ if __name__ == '__main__':
     logger.info("Starting standalone JobHunterAI job search application...")
     logger.info("Test user created: email=test@example.com, password=password")
     
-    # Run the Flask app on a different port
-    port = 9091  # Changed from 9090 to avoid conflicts
+    # Get port from environment variable or use default
+    port = int(os.environ.get('FLASK_RUN_PORT', 9091))
+    logger.info(f"Starting server on port {port}")
     app.run(host='127.0.0.1', port=port, debug=True)

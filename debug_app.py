@@ -203,5 +203,7 @@ if __name__ == '__main__':
     logger.info("Starting simplified JobHunterAI application with debug mode...")
     logger.info("Test user created: email=test@example.com, password=password")
     
-    # Run the Flask app
-    app.run(host='127.0.0.1', port=8088, debug=True)
+    # Get port from environment variable or use default
+    port = int(os.environ.get('FLASK_RUN_PORT', 8088))
+    logger.info(f"Starting server on port {port}")
+    app.run(host='127.0.0.1', port=port, debug=True)

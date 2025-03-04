@@ -1,82 +1,424 @@
-/* Custom styles that complement Bootstrap dark theme */
+/* Modern UI with Glassmorphism and Warm Color Theme */
 
-/* Body styles */
+/* CSS Variables */
+:root {
+    /* Warm Color Theme */
+    --primary-gradient: linear-gradient(135deg, #ff9a44, #fc6076);
+    --secondary-gradient: linear-gradient(135deg, #f9748f, #ff9a44);
+    --accent-gradient: linear-gradient(135deg, #ff6a88, #ff99ac);
+    
+    /* Glassmorphism */
+    --glass-bg: rgba(25, 20, 20, 0.85); /* Darkened for better contrast */
+    --card-shadow: 0 8px 32px 0 rgba(99, 30, 27, 0.37);
+    --border-color: rgba(255, 255, 255, 0.18);
+    
+    /* Colors */
+    --dark-bg: #1a1414;
+    --light-text: #ffffff; /* Pure white for maximum contrast */
+    --accent-color: #ff7e5f;
+    --secondary-color: #feb47b;
+    --success-color: #7dce82;
+    --danger-color: #ff6b6b;
+    --info-color: #5bc0eb;
+    --muted-text: rgba(255, 255, 255, 0.85); /* Brightened for better contrast */
+    
+    /* Overriding Bootstrap variables */
+    --bs-primary: #ff7e5f;
+    --bs-primary-rgb: 255, 126, 95;
+    --bs-secondary: #feb47b;
+    --bs-success: #7dce82;
+    --bs-info: #5bc0eb;
+    --bs-warning: #ffb347;
+    --bs-danger: #ff6b6b;
+}
+
+/* Background */
 body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    background-color: var(--dark-bg);
+    background-image: 
+        radial-gradient(ellipse at top left, rgba(255, 158, 89, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse at bottom right, rgba(252, 96, 118, 0.15) 0%, transparent 70%);
+    color: var(--light-text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Ensure all text is light */
+p, .card-text, li, label, .list-group-item, .text-muted, .modal-body, .modal-content,
+span:not(.navbar-brand):not(.card-title):not(.text-accent):not(.badge):not(.feature-icon),
+small, div:not(.feature-icon):not(.navbar-brand), td, th, a:not(.navbar-brand) {
+    color: var(--light-text) !important;
+}
+
+/* Adjust muted text to be still visible but slightly dimmed */
+.text-muted {
+    color: var(--muted-text) !important;
+}
+
+/* Make all list text white */
+ul, ol, .list-group {
+    color: var(--light-text);
+}
+
+/* Specific exceptions for elements that should keep their original styling */
+.navbar-brand, .card-title, .text-accent, h1, h2, h3, h4, h5, h6, .badge, .feature-icon {
+    /* These will keep their original colors */
 }
 
 /* Main content area */
 main.container {
     flex: 1;
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
 }
 
-/* Card customization */
+/* Glassmorphism Cards */
 .card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.15);
-    margin-bottom: 1.5rem;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.75rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    color: var(--light-text); /* Ensure card text is white */
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(99, 30, 27, 0.45);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-header {
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 1.5rem;
 }
 
 .card-title {
-    color: var(--bs-primary);
+    color: var(--accent-color);
     margin-bottom: 1.25rem;
+    font-weight: 700;
 }
 
-/* Job listings */
+/* Job listings with enhanced styling */
 #job-listings .card {
-    transition: transform 0.2s ease;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
-#job-listings .card:hover {
-    transform: translateY(-2px);
+#job-listings .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: 4px 0 0 4px;
 }
 
-/* Status badges */
+/* Special styling for job cards */
+.job-card {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.job-card .card-title {
+    font-weight: 700;
+    font-size: 1.25rem;
+}
+
+.job-card .card-subtitle {
+    color: var(--secondary-color) !important;
+    font-weight: 600;
+}
+
+/* Ensure job description is readable */
+.job-description, #job-listings p {
+    color: var(--light-text) !important;
+}
+
+.job-card .border-top,
+.job-card .border-bottom {
+    border-color: var(--border-color) !important;
+}
+
+/* Badge styling */
 .badge {
     padding: 0.5em 0.75em;
+    font-weight: 600;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+}
+
+/* Button styling with gradients */
+.glow-button, .btn-primary {
+    background-image: var(--primary-gradient);
+    border: none;
+    color: #ffffff !important; /* Pure WHITE text */
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700 !important; /* Increased weight for visibility */
+    padding: 0.7rem 1.7rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(252, 96, 118, 0.35);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important; /* Strong text shadow for contrast */
+}
+
+.glow-button *, .btn-primary * {
+    color: #ffffff !important; /* Force all child elements to be white */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+}
+
+.glow-button:hover, .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(252, 96, 118, 0.4);
+    color: #ffffff !important; /* Pure WHITE text on hover */
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6) !important; /* Even stronger on hover */
+}
+
+.glow-button:active, .btn-primary:active {
+    transform: translateY(1px);
+    color: #ffffff !important; /* Pure WHITE text on active */
+}
+
+.action-button, .btn-secondary {
+    background-image: var(--secondary-gradient);
+    border: none;
+    color: #ffffff !important; /* Pure WHITE text */
+    padding: 0.7rem 1.7rem;
+    border-radius: 8px;
+    font-weight: 700 !important; /* Increased weight for visibility */
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(254, 180, 123, 0.3);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important; /* Strong text shadow for contrast */
+}
+
+.action-button *, .btn-secondary * {
+    color: #ffffff !important; /* Force all child elements to be white */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5) !important;
+}
+
+.action-button:hover, .btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(254, 180, 123, 0.4);
+    color: #ffffff !important; /* Pure WHITE text on hover */
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6) !important; /* Even stronger on hover */
+}
+
+/* Universal white text for ALL buttons - highest specificity */
+.btn, 
+button, 
+.btn-outline-primary, 
+.btn-primary,
+.btn-secondary,
+.btn a, 
+a.btn, 
+button a, 
+a.button, 
+.login-btn, 
+.register-btn, 
+input[type="submit"], 
+.btn-login, 
+.btn-register,
+.glow-button, 
+.action-button,
+[type="submit"],
+[type="button"],
+.badge.bg-primary, 
+.badge.bg-secondary, 
+.badge.bg-success, 
+.badge.bg-danger, 
+.badge.bg-info {
+    color: #ffffff !important; /* Force PURE WHITE */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* Text shadow for better visibility */
+}
+
+/* Ensure buttons on hover/active state still have white text */
+.btn:hover, 
+button:hover, 
+.btn-outline-primary:hover, 
+.btn a:hover, 
+a.btn:hover, 
+button a:hover, 
+a.button:hover, 
+.login-btn:hover, 
+.register-btn:hover, 
+input[type="submit"]:hover, 
+.btn-login:hover, 
+.btn-register:hover,
+.glow-button:hover, 
+.action-button:hover, 
+.btn-primary:hover, 
+.btn-secondary:hover,
+[type="submit"]:hover,
+[type="button"]:hover,
+a:hover {
+    color: #ffffff !important; /* PURE WHITE on hover */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5); /* Slightly stronger shadow on hover */
+}
+
+/* Direct targeting of Login/Register/Optimize buttons */
+a[href*="login"],
+a[href*="register"],
+a[href*="optimize"],
+form button[type="submit"],
+.btn-primary,
+.action-button,
+.glow-button {
+    color: #ffffff !important; /* PURE WHITE */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3); /* Text shadow for better visibility */
+    font-weight: bold !important; /* Make text more visible */
+}
+
+/* Special button overrides for critical button styling */
+.card .btn-primary, 
+.card button[type="submit"],
+.card-body .action-button,
+.modal-body .action-button,
+.card-body .btn-primary,
+.modal-body .btn-primary,
+.card-body .glow-button,
+.modal-body .glow-button {
+    color: #ffffff !important; /* Force PURE WHITE */
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4); /* Stronger shadow for card buttons */
+    letter-spacing: 0.5px; /* Improve readability */
 }
 
 /* Form elements */
 .form-control, .form-select {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(20, 20, 20, 0.7); /* Darker background for better contrast */
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--light-text) !important;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
 }
 
 .form-control:focus, .form-select:focus {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: var(--bs-primary);
+    background-color: rgba(20, 20, 20, 0.8); /* Even darker on focus */
+    border-color: var(--accent-color);
     box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+    color: white !important;
 }
 
-/* Custom button styles */
-.btn-primary {
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+/* Make sure select options are readable */
+.form-select option {
+    background-color: var(--dark-bg);
+    color: var(--light-text) !important;
+}
+
+/* Input groups */
+.input-group-text {
+    background-color: rgba(20, 20, 20, 0.8); 
+    border-color: var(--border-color);
+    color: var(--accent-color);
+}
+
+.form-label {
+    color: var(--secondary-color);
     font-weight: 600;
-    padding: 0.5rem 1.5rem;
+    margin-bottom: 0.5rem;
 }
 
-/* Modal customization */
+/* Navbar styling */
+.navbar {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    background: var(--primary-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    padding: 0.25rem 0;
+}
+
+.nav-link {
+    color: var(--light-text) !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem 1rem !important;
+}
+
+.nav-link:hover {
+    color: var(--accent-color) !important;
+}
+
+.nav-item span.nav-link {
+    color: var(--light-text) !important; /* Ensure username text is white */
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 50%;
+    background-image: var(--accent-gradient);
+    transition: all 0.3s ease;
+    transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+    width: 80%;
+}
+
+/* Modal styling */
 .modal-content {
-    border: none;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5);
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color);
 }
 
 /* Resume optimization preview */
-#optimized-resume {
-    font-family: monospace;
+#resume-preview, #optimized-resume {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
     white-space: pre-wrap;
     max-height: 400px;
     overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
 }
 
 /* Application tracker table */
 .table {
+    background: transparent;
     margin-bottom: 0;
+    color: var(--light-text);
 }
 
 .table th {
@@ -84,25 +426,114 @@ main.container {
     text-transform: uppercase;
     font-size: 0.875rem;
     letter-spacing: 0.5px;
+    color: var(--secondary-color);
+    font-weight: 700;
+    padding: 1rem 0.75rem;
 }
 
-/* Footer customization */
+.table td {
+    border-color: var(--border-color);
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+}
+
+/* Footer styling */
 .footer {
     margin-top: auto;
     padding: 1.5rem 0;
-    background-color: rgba(0, 0, 0, 0.2) !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-color);
 }
 
-/* Alert customization */
+.footer a {
+    color: var(--accent-color) !important;
+    transition: all 0.3s ease;
+}
+
+.footer a:hover {
+    color: var(--secondary-color) !important;
+}
+
+/* Link styling */
+a:not(.btn):not(.navbar-brand):not(.nav-link):not(.footer a) {
+    color: var(--accent-color) !important;
+    transition: all 0.3s ease;
+}
+
+a:not(.btn):not(.navbar-brand):not(.nav-link):not(.footer a):hover {
+    color: var(--secondary-color) !important;
+}
+
+.text-accent {
+    color: var(--accent-color);
+}
+
+/* Alert styling */
 .alert {
     margin-bottom: 1.5rem;
-    border: none;
+    border-radius: 8px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border-left: 4px solid transparent;
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    color: var(--light-text) !important;
+}
+
+.alert-success {
+    border-left-color: var(--success-color);
+}
+
+.alert-danger {
+    border-left-color: var(--danger-color);
+}
+
+.alert-info {
+    border-left-color: var(--info-color);
+}
+
+.alert-warning {
+    border-left-color: var(--bs-warning);
 }
 
 /* Icons */
 .bi {
     margin-right: 0.5rem;
 }
+
+/* Animations */
+.animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading spinner with gradient */
+.spinner-border {
+    margin: 2rem auto;
+    width: 3rem;
+    height: 3rem;
+    border: 0.25rem solid transparent;
+    border-radius: 50%;
+    border-top-color: var(--accent-color);
+    border-bottom-color: var(--secondary-color);
+    animation: spinner 1s linear infinite;
+}
+
+@keyframes spinner {
+    to { transform: rotate(360deg); }
+}
+
+/* Status colors with warm theme */
+.bg-applied { background-color: var(--accent-color) !important; }
+.bg-interviewing { background-color: var(--info-color) !important; }
+.bg-offered { background-color: var(--success-color) !important; }
+.bg-rejected { background-color: var(--danger-color) !important; }
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
@@ -113,17 +544,8 @@ main.container {
     .table-responsive {
         margin: 0 -1rem;
     }
+    
+    .glow-button, .btn-primary, .action-button, .btn-secondary {
+        padding: 0.6rem 1.2rem;
+    }
 }
-
-/* Loading spinner */
-.spinner-border {
-    margin: 2rem auto;
-    width: 3rem;
-    height: 3rem;
-}
-
-/* Status colors */
-.bg-applied { background-color: var(--bs-primary) !important; }
-.bg-interviewing { background-color: var(--bs-info) !important; }
-.bg-offered { background-color: var(--bs-success) !important; }
-.bg-rejected { background-color: var(--bs-danger) !important; }

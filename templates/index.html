@@ -2,76 +2,130 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-body text-center">
-                <h1 class="display-4 mb-4">Welcome to JobHunterAI</h1>
-                <p class="lead">Your AI-powered job search assistant</p>
+    <div class="col-lg-10">
+        <!-- Hero Section -->
+        <div class="card mb-5">
+            <div class="card-body text-center py-5">
+                <h1 class="display-4 mb-3" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;">Welcome to JobHunterAI</h1>
+                <p class="lead mb-5">Your AI-powered assistant for finding and landing your dream job</p>
                 
                 {% if not current_user.is_authenticated %}
-                <div class="mt-5 mb-5">
-                    <div class="row justify-content-center">
-                        <div class="col-md-6">
-                            <div class="d-grid gap-3">
-                                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
-                                    <i class="bi bi-box-arrow-in-right"></i> Login
-                                </a>
-                                <a href="{{ url_for('register') }}" class="btn btn-outline-primary btn-lg">
-                                    <i class="bi bi-person-plus"></i> Register
-                                </a>
-                            </div>
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-6">
+                        <div class="d-grid gap-3">
+                            <a href="{{ url_for('login') }}" class="glow-button btn-lg">
+                                <i class="bi bi-box-arrow-in-right"></i> Login
+                            </a>
+                            <a href="{{ url_for('register') }}" class="action-button btn-lg">
+                                <i class="bi bi-person-plus"></i> Register
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-6">
+                        <div class="d-grid">
+                            <a href="{{ url_for('jobs') }}" class="glow-button btn-lg">
+                                <i class="bi bi-search"></i> Start Searching Jobs
+                            </a>
                         </div>
                     </div>
                 </div>
                 {% endif %}
-                
-                <div class="row g-4 mt-3">
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-search"></i> Job Search
-                                </h5>
-                                <p class="card-text">Find and apply to jobs with AI-powered recommendations.</p>
-                                <a href="{{ url_for('jobs') }}" class="btn btn-primary">Browse Jobs</a>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <h2 class="text-center mb-4">Supercharge Your Job Search</h2>
+        
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon me-3 fs-3" style="color: var(--accent-color);">
+                                <i class="bi bi-search"></i>
                             </div>
+                            <h5 class="card-title mb-0">AI-Powered Job Search</h5>
                         </div>
+                        <p class="card-text">Find the perfect job opportunities matched to your skills and preferences. Our AI scans thousands of listings to find your ideal match.</p>
+                        <a href="{{ url_for('jobs') }}" class="btn btn-primary">Browse Jobs</a>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-file-text"></i> Resume Optimizer
-                                </h5>
-                                <p class="card-text">Tailor your resume for each job with AI suggestions.</p>
-                                <a href="{{ url_for('resume') }}" class="btn btn-primary">Optimize Resume</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon me-3 fs-3" style="color: var(--secondary-color);">
+                                <i class="bi bi-file-text"></i>
                             </div>
+                            <h5 class="card-title mb-0">Resume Optimization</h5>
                         </div>
+                        <p class="card-text">Let AI analyze job descriptions and optimize your resume to highlight relevant skills and experience, increasing your chances of getting an interview.</p>
+                        <a href="{{ url_for('resume') }}" class="btn btn-primary">Optimize Resume</a>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-clipboard-check"></i> Application Tracker
-                                </h5>
-                                <p class="card-text">Track your job applications and follow-ups.</p>
-                                <a href="{{ url_for('applications') }}" class="btn btn-primary">View Applications</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon me-3 fs-3" style="color: var(--info-color);">
+                                <i class="bi bi-clipboard-check"></i>
                             </div>
+                            <h5 class="card-title mb-0">Application Tracking</h5>
                         </div>
+                        <p class="card-text">Never lose track of your applications again. Track status, set reminders for follow-ups, and keep all job-related communications organized.</p>
+                        <a href="{{ url_for('applications') }}" class="btn btn-primary">View Applications</a>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <i class="bi bi-file-earmark-text"></i> Cover Letters
-                                </h5>
-                                <p class="card-text">Generate customized cover letters for each application.</p>
-                                <a href="{{ url_for('jobs') }}" class="btn btn-primary">Start Applying</a>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="feature-icon me-3 fs-3" style="color: var(--success-color);">
+                                <i class="bi bi-file-earmark-text"></i>
                             </div>
+                            <h5 class="card-title mb-0">AI Cover Letters</h5>
                         </div>
+                        <p class="card-text">Generate personalized, compelling cover letters tailored to each job application with just a few clicks. Stand out with professionally written content.</p>
+                        <a href="{{ url_for('jobs') }}" class="btn btn-primary">Start Applying</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- How It Works -->
+        <div class="card mb-5">
+            <div class="card-body p-4">
+                <h3 class="text-center mb-4">How It Works</h3>
+                <div class="row justify-content-center text-center g-4">
+                    <div class="col-md-4">
+                        <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: var(--glass-bg); border: 1px solid var(--border-color);">
+                            <span class="fs-3" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">1</span>
+                        </div>
+                        <h5>Create an Account</h5>
+                        <p class="small">Sign up and upload your resume to get started on your job search journey.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: var(--glass-bg); border: 1px solid var(--border-color);">
+                            <span class="fs-3" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">2</span>
+                        </div>
+                        <h5>Find Opportunities</h5>
+                        <p class="small">Search and filter jobs that match your skills, experience, and preferences.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; background: var(--glass-bg); border: 1px solid var(--border-color);">
+                            <span class="fs-3" style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">3</span>
+                        </div>
+                        <h5>Apply with AI</h5>
+                        <p class="small">Optimize your application materials with AI and track your progress.</p>
                     </div>
                 </div>
             </div>

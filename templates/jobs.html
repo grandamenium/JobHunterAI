@@ -2,20 +2,30 @@
 
 {% block content %}
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-lg-4">
         <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-search me-2"></i>Find Your Dream Job
+                </h5>
+            </div>
             <div class="card-body">
-                <h5 class="card-title">Job Search Preferences</h5>
                 <form id="job-search-form" method="GET" action="{{ url_for('jobs') }}">
                     <div class="mb-3">
                         <label for="keywords" class="form-label">Job Title or Keywords</label>
-                        <input type="text" class="form-control" id="keywords" name="keywords" value="{{ request.args.get('keywords', '') }}" placeholder="e.g. Software Engineer, Data Scientist">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-briefcase"></i></span>
+                            <input type="text" class="form-control" id="keywords" name="keywords" value="{{ request.args.get('keywords', '') }}" placeholder="e.g. Software Engineer, Data Scientist">
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="location" class="form-label">Location</label>
-                        <input type="text" class="form-control" id="location" name="location" value="{{ request.args.get('location', '') }}" placeholder="e.g. New York, Washington DC, Remote">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-geo-alt"></i></span>
+                            <input type="text" class="form-control" id="location" name="location" value="{{ request.args.get('location', '') }}" placeholder="e.g. New York, Washington DC, Remote">
+                        </div>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label for="job-type" class="form-label">Job Type</label>
                         <select class="form-select" id="job-type" name="job-type">
                             <option value="full-time" {% if request.args.get('job-type') == 'full-time' %}selected{% endif %}>Full Time</option>
@@ -23,23 +33,48 @@
                             <option value="internship" {% if request.args.get('job-type') == 'internship' %}selected{% endif %}>Internship</option>
                         </select>
                     </div>
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-search"></i> Search USAJobs.gov
+                    <div class="d-grid">
+                        <button type="submit" class="glow-button">
+                            <i class="bi bi-search"></i> Search Jobs
                         </button>
                         <div class="text-center mt-2">
-                            <small class="text-muted">Searches USAJobs.gov for government job listings</small>
+                            <span class="badge" style="background: var(--glass-bg); border: 1px solid var(--border-color);">
+                                <i class="bi bi-info-circle"></i> Searching USAJobs.gov
+                            </span>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
+        
+        <!-- Tips Card -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>Search Tips
+                </h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush bg-transparent">
+                    <li class="list-group-item bg-transparent border-bottom">Use specific job titles for better results</li>
+                    <li class="list-group-item bg-transparent border-bottom">Try multiple locations to find remote opportunities</li>
+                    <li class="list-group-item bg-transparent">Use skill keywords to find matching positions</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <div class="col-md-8">
+    <div class="col-lg-8">
         <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list-ul me-2"></i>Job Listings
+                </h5>
+                {% if jobs and jobs|length > 0 %}
+                <span class="badge bg-primary">{{ jobs|length }} jobs found</span>
+                {% endif %}
+            </div>
             <div class="card-body">
-                <h5 class="card-title">Job Listings</h5>
                 <div id="job-listings">
                     {% if request.args.get('keywords') or request.args.get('location') %}
                         <div class="alert alert-info mb-3">
@@ -55,36 +90,43 @@
                 
                     {% if jobs %}
                         {% for job in jobs %}
-                        <div class="card mb-3">
+                        <div class="card mb-4 job-card">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
-                                        <h5 class="card-title">{{ job.title }}</h5>
-                                        <h6 class="card-subtitle mb-2 text-muted">{{ job.company }}</h6>
+                                        <h5 class="card-title mb-1">{{ job.title }}</h5>
+                                        <h6 class="card-subtitle mb-2">{{ job.company }}</h6>
                                     </div>
-                                    <span class="badge bg-secondary">{{ job.source }}</span>
+                                    <span class="badge" style="background: var(--glass-bg); border: 1px solid var(--border-color);">{{ job.source }}</span>
                                 </div>
-                                <p class="card-text">
-                                    <i class="bi bi-geo-alt"></i> {{ job.location }}<br>
-                                    <small class="text-muted">Posted: {{ job.date_posted.strftime('%Y-%m-%d') }}</small>
-                                </p>
-                                <p class="card-text">
-                                    {% if job.description|length > 200 %}
-                                        {{ job.description[:200] }}...
+                                <div class="mb-3">
+                                    <p class="card-text mb-1">
+                                        <i class="bi bi-geo-alt"></i> {{ job.location }}
+                                    </p>
+                                    <p class="card-text mb-1">
+                                        <i class="bi bi-cash"></i> {{ job.salary }}
+                                    </p>
+                                    <p class="card-text">
+                                        <small class="text-muted"><i class="bi bi-calendar3"></i> Posted: {{ job.date_posted.strftime('%b %d, %Y') }}</small>
+                                    </p>
+                                </div>
+                                <p class="card-text border-top border-bottom py-3">
+                                    {% if job.description|length > 180 %}
+                                        {{ job.description[:180] }}...
                                     {% else %}
                                         {{ job.description }}
                                     {% endif %}
                                 </p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#jobModal{{ job.id }}">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#jobModal{{ job.id }}">
                                         <i class="bi bi-info-circle"></i> View Details
                                     </button>
-                                    <div>
-                                        <a href="{{ url_for('optimize_resume', job_id=job.id) }}" class="btn btn-success btn-sm me-2">
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ url_for('optimize_resume', job_id=job.id) }}" class="action-button">
                                             <i class="bi bi-file-earmark-text"></i> Optimize Resume
                                         </a>
-                                        <a href="{{ job.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
-                                            <i class="bi bi-box-arrow-up-right"></i> View Original
+                                        <a href="{{ job.url }}" target="_blank" class="btn btn-outline-primary">
+                                            <i class="bi bi-box-arrow-up-right"></i> Original
                                         </a>
                                     </div>
                                 </div>
@@ -112,29 +154,59 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <h6>{{ job.company }}</h6>
-                    <span class="badge bg-secondary">{{ job.source }}</span>
-                </div>
-                <p>
-                    <i class="bi bi-geo-alt"></i> {{ job.location }}<br>
-                    <small class="text-muted">Posted: {{ job.date_posted.strftime('%Y-%m-%d') }}</small>
-                </p>
-                <hr>
-                <div class="job-description">
-                    <h6>Job Description</h6>
-                    <p>{{ job.description }}</p>
-                </div>
-                <div class="mt-4">
-                    <h6>Actions</h6>
-                    <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ job.url }}" target="_blank" class="btn btn-outline-primary">
-                            <i class="bi bi-box-arrow-up-right"></i> View Original Post
-                        </a>
-                        <a href="{{ url_for('optimize_resume', job_id=job.id) }}" class="btn btn-success">
-                            <i class="bi bi-file-earmark-text"></i> Optimize Resume
-                        </a>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <span class="badge mb-2" style="background: var(--glass-bg); border: 1px solid var(--border-color);">
+                            {{ job.source }}
+                        </span>
+                        <h5 class="mb-0">{{ job.company }}</h5>
                     </div>
+                    <div class="text-end">
+                        <p class="mb-1">
+                            <i class="bi bi-geo-alt"></i> {{ job.location }}
+                        </p>
+                        <p class="mb-1">
+                            <i class="bi bi-cash"></i> {{ job.salary }}
+                        </p>
+                        <small class="text-muted"><i class="bi bi-calendar3"></i> Posted: {{ job.date_posted.strftime('%b %d, %Y') }}</small>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-file-text me-2"></i>Job Description</h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="job-description">{{ job.description }}</p>
+                    </div>
+                </div>
+                
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="bi bi-tools me-2"></i>Actions</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="d-grid">
+                                    <a href="{{ url_for('optimize_resume', job_id=job.id) }}" class="action-button">
+                                        <i class="bi bi-magic"></i> Optimize Your Resume
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-grid">
+                                    <a href="{{ job.url }}" target="_blank" class="glow-button">
+                                        <i class="bi bi-box-arrow-up-right"></i> Apply on {{ job.source }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <small class="text-muted">Job ID: {{ job.id }} • Matched using AI-powered search</small>
                 </div>
             </div>
             <div class="modal-footer">
