@@ -1,16 +1,26 @@
 import os
 import logging
 from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class CoverLetterGenerator:
     def __init__(self):
-        # Use a dummy key if OPENAI_API_KEY is not set
-        api_key = os.environ.get("OPENAI_API_KEY", "dummy-key-for-testing")
+        # Try to get the API key from config module first, fall back to environment variable
+        try:
+            from config.config import OPENAI_API_KEY
+            api_key = OPENAI_API_KEY
+        except ImportError:
+            # Use environment variable if config module is not available
+            api_key = os.environ.get("OPENAI_API_KEY", "dummy-key-for-testing")
+            
         self.openai = OpenAI(api_key=api_key)
         self.logger = logging.getLogger(__name__)
         
         # Warn if using dummy key
-        if api_key == "dummy-key-for-testing":
+        if not api_key or api_key == "dummy-key-for-testing":
             self.logger.warning("Using dummy OpenAI API key. Cover letter generation will not work correctly.")
 
     def generate_cover_letter(self, job_description, resume, company_name):

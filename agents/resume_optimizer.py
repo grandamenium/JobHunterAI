@@ -2,17 +2,27 @@ import os
 from openai import OpenAI
 import json
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 class ResumeOptimizerAgent:
     def __init__(self):
-        # Use a dummy key if OPENAI_API_KEY is not set
-        api_key = os.environ.get("OPENAI_API_KEY", "dummy-key-for-testing")
+        # Try to get the API key from config module first, fall back to environment variable
+        try:
+            from config.config import OPENAI_API_KEY
+            api_key = OPENAI_API_KEY
+        except ImportError:
+            # Use environment variable if config module is not available
+            api_key = os.environ.get("OPENAI_API_KEY", "dummy-key-for-testing")
+            
         self.openai = OpenAI(api_key=api_key)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.DEBUG)
         
         # Warn if using dummy key
-        if api_key == "dummy-key-for-testing":
+        if not api_key or api_key == "dummy-key-for-testing":
             self.logger.warning("Using dummy OpenAI API key. Resume optimization will not work correctly.")
 
     def analyze_job_description(self, job_description):

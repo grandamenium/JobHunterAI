@@ -31,7 +31,15 @@ def open_browser():
 if __name__ == "__main__":
     # Print startup message
     logger.info("Starting JobHunterAI application...")
-    logger.info(f"Using OpenAI API key: {'Set' if os.environ.get('OPENAI_API_KEY') else 'Not set'}")
+    # Check for API key from either config or environment variable
+    try:
+        from config.config import OPENAI_API_KEY
+        api_key_source = "config module"
+    except ImportError:
+        OPENAI_API_KEY = os.environ.get('OPENAI_API_KEY')
+        api_key_source = "environment variable"
+    
+    logger.info(f"Using OpenAI API key from {api_key_source}: {'Set' if OPENAI_API_KEY else 'Not set'}")
     logger.info(f"Database URL: {os.environ.get('DATABASE_URL', 'sqlite:///instance/job_application_system.db')}")
     
     # Start a thread to open the browser automatically
